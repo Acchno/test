@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Estoque</title>
+    <script>
+        async function fetchEstoque() {
+            const response = await fetch('/estoque');
+            const data = await response.json();
+            const estoqueDiv = document.getElementById('estoque');
+            estoqueDiv.innerHTML = '';
+            data.forEach(item => {
+                estoqueDiv.innerHTML += `<p>${item.nome} - Quantidade: ${item.quantidade} - Última Atualização: ${new Date(item.ultima_atualizacao).toLocaleString()} - Usuário: ${item.usuario}</p>`;
+            });
+        }
+
+        async function fetchLog() {
+            const response = await fetch('/log');
+            const data = await response.json();
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = '';
+            data.forEach(entry => {
+                logDiv.innerHTML += `<p>${entry.nome_item} - Quantidade: ${entry.quantidade} - Ação: ${entry.acao} - Data/Hora: ${new Date(entry.data_hora).toLocaleString()} - Usuário: ${entry.usuario}</p>`;
+            });
+        }
+
+        async function addItem() {
+            const nome = document.getElementById('nome').value;
+            const quantidade = parseInt(document.getElementById('quantidade').value);
+            const usuario = document.getElementById('usuario').value;
+            await fetch('/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome,
+                    quantidade,
+                    usuario
+                })
+            });
+            fetchEstoque();
+            fetchLog();
+        }
+
+        async function removeItem() {
+            const nome = document.getElementById('nome').value;
+            const quantidade = parseInt(document.getElementById('quantidade').value);
+            const usuario = document.getElementById('usuario').value;
+            await fetch('/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nome,
+                    quantidade,
+                    usuario
+                })
+            });
+            fetchEstoque();
+            fetchLog();
+        }
+
+        window.onload = () => {
+            fetchEstoque();
+            fetchLog();
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Gerenciamento de Estoque</h1>
+    <div>
+        <label>Nome do Item:</label>
+        <input type="text" id="nome" required>
+        <label>Quantidade:</label>
+        <input type="number" id="quantidade" required>
+        <label>Usuário:</label>
+        <input type="text" id="usuario" required>
+        <button onclick="addItem()">Adicionar</button>
+        <button onclick="removeItem()">Remover</button>
+    </div>
+    <h2>Estoque Atual</h2>
+    <div id="estoque"></div>
+    <h2>Log de Mudanças</h2>
+    <div id="log"></div>
+</body>
+
+</html>
